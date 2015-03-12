@@ -15,15 +15,15 @@ y2 = 1000
 # 967 55
 # 1120 62
  
-def getScreen():
-    #screen = screenGrab(leftCornerx,leftCornery,x2,y2)
-    #img = array(screen)
-    #img = cv2.cv.fromarray(screen)
-    img = cv2.imread('snap__1426174983.png')
+def getScreen(x1, y1, x2, y2):
+    box = (x1, y1, x2, y2)
+    screen = ImageGrab.grab(box)
+    img =  array(screen.getdata(),dtype=uint8).reshape((screen.size[1],screen.size[0],3))
+    # img = cv2.imread('snap__1426174983.png')
     return img
 
 def findTarget(img):    
-    template_tg = cv2.imread('template_target2.png')
+    template_tg = cv2.imread('template_target2.png', 0)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     ret,th1 = cv2.threshold(gray,253,255,cv2.THRESH_TOZERO_INV)
     ret,th3 = cv2.threshold(th1,251,255,cv2.THRESH_BINARY)
@@ -46,64 +46,90 @@ def findTarget(img):
         center = int(center)
         moveMouse(center-10,left[1]+70)
         time.sleep(1)
-        if (findFromTargeted(gray, template_tg, left, right)):
-            return (center-10,left[1]+70)
+        if (findFromTargeted(template_tg, left, right)):
+            autoit.mouse_click('left', center-10, left[1]+70)
+            return True
         pyautogui.moveTo(center,left[1]+70)
         moveMouse(center,left[1]+70)
         time.sleep(1)
-        if (findFromTargeted(gray, template_tg, left, right)):
-            return (center,left[1]+70)
-        moveMouse(center+10,left[1]+70)
-        time.sleep(1)
-        if (findFromTargeted(gray, template_tg, left, right)):
-            return (center+10,left[1]+70)
+        if (findFromTargeted(template_tg, left, right)):
+            autoit.mouse_click('left', center+10, left[1]+70)
+            return True
 
-def findFromTargeted(img, template, left, right):
-    w, h = template.shape[::-1]
-    roi = img[left[1]-8:right[1]+8, left[0]-25:right[0]];
+def findFromTargeted(template, left, right):
+    # print template.shape
+    roi = getScreen(left[0]-25+leftCornerx, left[1]-8+leftCornery, right[0]+leftCornerx, right[1]+8+leftCornery)
+    cv2.imwrite('roi' + str(int(time.time())) + '.png',roi)
+    roi = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
+    # roi = img[left[1]-8:right[1]+8, left[0]-25:right[0]];
     ret,th1 = cv2.threshold(roi,200,255,cv2.THRESH_TOZERO_INV)
     ret,th2 = cv2.threshold(th1,100,255,cv2.THRESH_BINARY)
     ret,tp1 = cv2.threshold(template,200,255,cv2.THRESH_TOZERO_INV)
     ret,tp2 = cv2.threshold(tp1,100,255,cv2.THRESH_BINARY)
-    res = cv2.matchTemplate(th2, tp2, cv2.TM_CCORR_NORMED)
-    if (res.any()):
-        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-        if (max_val > 0.9):
-            return True
-        else:
-            return False
+    wth, hth = cv.GetSize(th2)
+    wtp, htp = cv.GetSize(tp2)
+    if (wth > wtp && hth > htp):
+        res = cv2.matchTemplate(th2, tp2, cv2.TM_CCORR_NORMED)
+        if (res.any()):
+            # cv2.imwrite('th2' + str(int(time.time())) + '.png',th2)
+            # cv2.imwrite('tp2' + str(int(time.time())) + '.png',tp2)
+            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+            print 'max_val %.2f'%max_val
+            if (max_val > 0.9):
+                return True
+            else:
+                return False
+    return False
 def grabHP():
-    # hp = screenGrab(leftCornerx + 958,leftCornery + 16,leftCornerx + 1111,leftCornery + 25)
-    # gray = cv2.cvtColor(hp, cv2.COLOR_BGR2GRAY)
+    hp = getScreen(leftCornerx + 958,leftCornery + 16,leftCornerx + 1111,leftCornery + 25)
+    gray = cv2.cvtColor(hp, cv2.COLOR_BGR2GRAY)
 
-    img = cv2.imread('snap__1426174990.png')
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    roi = gray[16:25, 958:1111];
-    return roi
+    # img = cv2.imread('snap__1426174990.png')
+    # gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    # roi = gray[16:25, 958:1111];
+    return gray
 
 
 def findHP(img):
+    statuses = { 'dead' : 0,  'lhalf' : 1, 'mhalf' : 2, 'full' : 3}
     gray = grabHP()
     # roi = gray[leftCornery + 16:leftCornery + 25, leftCornerx + 958:leftCornerx + 1111];
     ret,th1 = cv2.threshold(gray,100,255,cv2.THRESH_BINARY)
+    cv2.imwrite('hpgrab' + str(int(time.time())) + '.png',th1)
     (cnts, hierarchy) = cv2.findContours(th1,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-    # print len(cnts)
-    # cv2.drawContours(roi, cnts, -1, (0,255,0), 3)
-    leftmost = tuple(cnts[cnts[:,:,0].argmin()][0])
-    rightmost = tuple(cnts[cnts[:,:,0].argmax()][0])
-    print leftmost
-    print rightmost
-    return False
+    if (len(cnts) == 0):
+        return statuses['dead']
+    leftx = list(cnts[0][cnts[0][:,:,0].argmin()][0])[0]
+    rightx = list(cnts[0][cnts[0][:,:,0].argmax()][0])[0]
+    diff = rightx - leftx
+    if diff > 140:
+        return statuses['full']
+    if diff >= 75:
+        return statuses['mhalf']
+    if diff < 75:
+        return statuses['lhalf']
+    return statuses['dead']
 
 def moveMouse(x,y):
     autoit.mouse_move(x,y)
 
 def main():
-    img = getScreen()
     title = "[CLASS:l2UnrealWWindowsViewportWindow]"
-    if (findHP(img)):
-        print '1'
-        # autoit.control_send(title, "", '{F1}', 1)
+    counter = 0
+    while True:
+        img = getScreen(leftCornerx,leftCornery,x2,y2)
+        res = findHP(img);
+        print res
+        if res > 0:
+            autoit.control_send(title, '', '{F1}', 0)
+        else:
+            if counter > 1:
+                findTarget(img)
+                counter = 0
+            else:
+                counter += 1
+        time.sleep(0.5)
+        print 'counter ' + str(counter)
     pass
 
 if __name__ == '__main__':
