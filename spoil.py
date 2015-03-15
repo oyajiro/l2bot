@@ -58,7 +58,7 @@ def findTarget(img):
         if (findFromTargeted(template_tg, left, right)):
             autoit.mouse_click('left', center+10, left[1]+70)
             return True
-    # autoit.mouse_click('middle')
+    mouseRotate()
 
 def findFromTargeted(template, left, right):
     # print template.shape
@@ -125,11 +125,11 @@ def findHP(img):
 
 def moveMouse(x,y):
     autoit.mouse_move(x,y)
-def rotate:
-    autoit.mouse_move(968, 474)
+def mouseRotate():
+    autoit.mouse_move(655, 521)
     time.sleep(1)
     autoit.mouse_down('right')
-    autoit.mouse_move(970, 474)
+    autoit.mouse_move(663, 521)
     autoit.mouse_up('right')
 
 def main():
@@ -138,7 +138,7 @@ def main():
     counter = 0
     splcnt = 0
     time.sleep(2)
-    
+    mouseRotate()
 
     # while True:
     #     img = getScreen(leftCornerx,leftCornery,x2,y2)
