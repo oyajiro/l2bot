@@ -48,11 +48,13 @@ def findTarget(img):
         center = round((right[0]+left[0])/2)
         center = int(center)
         moveMouse(center-10,left[1]+70)
+        time.sleep(0.3)
         if (findFromTargeted(template_tg, left, right)):
             autoit.mouse_click('left', center-10, left[1]+70)
             return True
         pyautogui.moveTo(center,left[1]+70)
         moveMouse(center,left[1]+70)
+        time.sleep(0.3)
         if (findFromTargeted(template_tg, left, right)):
             autoit.mouse_click('left', center+10, left[1]+70)
             return True
@@ -61,7 +63,7 @@ def findTarget(img):
 def findFromTargeted(template, left, right):
     # print template.shape
     roi = getScreen(left[0]-25+leftCornerx, left[1]-8+leftCornery, right[0]+leftCornerx, right[1]+8+leftCornery)
-    cv2.imwrite('roi' + str(int(time.time())) + '.png',roi)
+    # cv2.imwrite('roi' + str(int(time.time())) + '.png',roi)
     roi = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
     # roi = img[left[1]-8:right[1]+8, left[0]-25:right[0]];
     ret,th1 = cv2.threshold(roi,200,255,cv2.THRESH_TOZERO_INV)
@@ -123,27 +125,47 @@ def findHP(img):
 
 def moveMouse(x,y):
     autoit.mouse_move(x,y)
+def rotate:
+    autoit.mouse_move(968, 474)
+    time.sleep(1)
+    autoit.mouse_down('right')
+    autoit.mouse_move(970, 474)
+    autoit.mouse_up('right')
 
 def main():
     title = "[CLASS:l2UnrealWWindowsViewportWindow]"
     autoit.win_wait(title, 5)
     counter = 0
-    while True:
-        img = getScreen(leftCornerx,leftCornery,x2,y2)
-        res = findHP(img);
-        print res
-        if res > 0:
-            autoit.control_send(title, '', '{F1}', 0)
-            time.sleep(2)
-        else:
-            if counter == 1:
-                autoit.control_send(title, '', '{F3}', 0)
+    splcnt = 0
+    time.sleep(2)
+    
 
-            if counter > 2:
-                findTarget(img)
-                counter = 0
-            counter += 1
-        print 'counter ' + str(counter)
+    # while True:
+    #     img = getScreen(leftCornerx,leftCornery,x2,y2)
+    #     res = findHP(img);
+    #     print res
+    #     if res > 0:
+    #         if res > 2 and splcnt < 2:
+    #             autoit.control_send(title, '', '{F2}', 0)
+    #             time.sleep(2)
+    #             splcnt += 1
+    #         else:
+    #             autoit.control_send(title, '', '{F1}', 0)
+    #             time.sleep(2)
+    #         counter = 0
+    #     else:
+    #         if res == 0 and counter == 0:
+    #             autoit.control_send(title, '', '{F4}', 0)
+    #         splcnt = 0
+
+    #         if counter == 1:
+    #             autoit.control_send(title, '', '{F3}', 0)
+
+    #         if counter > 2:
+    #             findTarget(img)
+    #             counter = 0
+    #         counter += 1
+    #     print 'counter ' + str(counter)
     pass
 
 if __name__ == '__main__':
