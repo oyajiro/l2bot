@@ -10,7 +10,9 @@ leftCornery = 38
 x1 = leftCornerx
 y1 = leftCornery
 x2 = 1390
-y2 = 1000
+# y2 = 1000
+y2 = 360
+title = "[CLASS:l2UnrealWWindowsViewportWindow]"
 
 # 967 55
 # 1120 62
@@ -25,8 +27,7 @@ def getScreen(x1, y1, x2, y2):
     # cv2.destroyAllWindows()
     return img
 
-def findTarget(img):    
-    template_tg = cv2.imread('template_target2.png', 0)
+def getTargetCntrs(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     ret,th1 = cv2.threshold(gray,253,255,cv2.THRESH_TOZERO_INV)
     ret,th3 = cv2.threshold(th1,251,255,cv2.THRESH_BINARY)
@@ -35,7 +36,11 @@ def findTarget(img):
     closed = cv2.erode(closed, None, iterations = 3)
     closed = cv2.dilate(closed, None, iterations = 2)
     (cnts, hierarchy) = cv2.findContours(closed,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    return cnts;
 
+def findTarget():
+    img = getScreen(leftCornerx,leftCornery,x2,y2)    
+    cnts = getTargetCntrs(img)
     approxes = []
     hulls = []
     for cnt in cnts:
@@ -48,28 +53,39 @@ def findTarget(img):
         center = round((right[0]+left[0])/2)
         center = int(center)
         moveMouse(center-10,left[1]+70)
-        time.sleep(0.3)
-        if (findFromTargeted(template_tg, left, right)):
+        res = findHP(img);
+        if res > 0:
+            autoit.control_send(title, '', '{F1}', 0)
+            return
+        if (findFromTargeted(left, right)):
             autoit.mouse_click('left', center-10, left[1]+70)
             return True
         pyautogui.moveTo(center,left[1]+70)
         moveMouse(center,left[1]+70)
-        time.sleep(0.3)
-        if (findFromTargeted(template_tg, left, right)):
+        res = findHP(img);
+        if res > 0:
+            autoit.control_send(title, '', '{F1}', 0)
+            return
+        if (findFromTargeted(left, right)):
             autoit.mouse_click('left', center+10, left[1]+70)
             return True
     mouseRotate()
 
-def findFromTargeted(template, left, right):
+def findFromTargeted(left, right):
+    template = cv2.imread('template_target2.png', 0)
     # print template.shape
     roi = getScreen(left[0]-25+leftCornerx, left[1]-8+leftCornery, right[0]+leftCornerx, right[1]+8+leftCornery)
+    roi2 = getScreen(left[0]+leftCornerx, left[1]+leftCornery, right[0]+leftCornerx, right[1]+leftCornery)
     # cv2.imwrite('roi' + str(int(time.time())) + '.png',roi)
+    # cv2.imwrite('roi2' + str(int(time.time())) + '.png',roi2)
     roi = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
     # roi = img[left[1]-8:right[1]+8, left[0]-25:right[0]];
     ret,th1 = cv2.threshold(roi,200,255,cv2.THRESH_TOZERO_INV)
     ret,th2 = cv2.threshold(th1,100,255,cv2.THRESH_BINARY)
     ret,tp1 = cv2.threshold(template,200,255,cv2.THRESH_TOZERO_INV)
     ret,tp2 = cv2.threshold(tp1,100,255,cv2.THRESH_BINARY)
+    if not hasattr(th2, 'shape'):
+        return False
     wth, hth = th2.shape
     wtp, htp = tp2.shape
     if wth > wtp and hth > htp:
@@ -79,7 +95,7 @@ def findFromTargeted(template, left, right):
             # cv2.imwrite('tp2' + str(int(time.time())) + '.png',tp2)
             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
             print 'max_val %.2f'%max_val
-            if (max_val > 0.9):
+            if (max_val > 0.7):
                 return True
             else:
                 return False
@@ -129,43 +145,40 @@ def mouseRotate():
     autoit.mouse_move(655, 521)
     time.sleep(1)
     autoit.mouse_down('right')
-    autoit.mouse_move(663, 521)
+    autoit.mouse_move(670, 521)
     autoit.mouse_up('right')
 
 def main():
-    title = "[CLASS:l2UnrealWWindowsViewportWindow]"
     autoit.win_wait(title, 5)
     counter = 0
     splcnt = 0
-    time.sleep(2)
-    mouseRotate()
 
-    # while True:
-    #     img = getScreen(leftCornerx,leftCornery,x2,y2)
-    #     res = findHP(img);
-    #     print res
-    #     if res > 0:
-    #         if res > 2 and splcnt < 2:
-    #             autoit.control_send(title, '', '{F2}', 0)
-    #             time.sleep(2)
-    #             splcnt += 1
-    #         else:
-    #             autoit.control_send(title, '', '{F1}', 0)
-    #             time.sleep(2)
-    #         counter = 0
-    #     else:
-    #         if res == 0 and counter == 0:
-    #             autoit.control_send(title, '', '{F4}', 0)
-    #         splcnt = 0
+    while True:
+        img = getScreen(leftCornerx,leftCornery,x2,y2)
+        res = findHP(img);
+        print res
+        if res > 0:
+            if res > 2 and splcnt < 2:
+                autoit.control_send(title, '', '{F2}', 0)
+                time.sleep(2)
+                splcnt += 1
+            else:
+                autoit.control_send(title, '', '{F1}', 0)
+                time.sleep(2)
+            counter = 0
+        else:
+            if res == 0 and counter == 0:
+                autoit.control_send(title, '', '{F4}', 0)
+            splcnt = 0
 
-    #         if counter == 1:
-    #             autoit.control_send(title, '', '{F3}', 0)
+            if counter < 3:
+                autoit.control_send(title, '', '{F3}', 0)
 
-    #         if counter > 2:
-    #             findTarget(img)
-    #             counter = 0
-    #         counter += 1
-    #     print 'counter ' + str(counter)
+            if counter > 2:
+                findTarget()
+                counter = 0
+            counter += 1
+        print 'counter ' + str(counter)
     pass
 
 if __name__ == '__main__':
