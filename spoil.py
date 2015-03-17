@@ -169,12 +169,15 @@ def checkOwnHp():
     if diff < 140:
         return statuses['cp']
 
-    hpCord = (24, 72, 175, 84)
+    hpCord = (24, 71, 175, 84)
     hp = ImageGrab.grab(hpCord)
     imgHP =  array(hp.getdata(),dtype=uint8).reshape((hp.size[1],hp.size[0],3))
     gray = cv2.cvtColor(imgHP, cv2.COLOR_BGR2GRAY)
-    ret,th1 = cv2.threshold(gray,130,255,cv2.THRESH_TOZERO_INV)
+    ret,th1 = cv2.threshold(gray,120,255,cv2.THRESH_TOZERO_INV)
     ret,th1 = cv2.threshold(th1,90,255,cv2.THRESH_TOZERO)
+    # cv2.imshow('image',th1)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
     (cnts, hierarchy) = cv2.findContours(th1,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 
     if (len(cnts) == 0):
@@ -193,7 +196,6 @@ def main():
     counter = 0
     splcnt = 0
     poitonUse = 0
-    time.sleep(2)
     while True:
         hpstatus = checkOwnHp()
         print 'hp ' + str(hpstatus)
