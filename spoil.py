@@ -12,6 +12,7 @@ y1 = leftCornery
 x2 = 1390
 # y2 = 1000
 y2 = 360
+fullY2 = 1000
 title = "[CLASS:l2UnrealWWindowsViewportWindow]"
 
 # 967 55
@@ -101,7 +102,7 @@ def findFromTargeted(left, right):
                 return False
     return False
 def grabHP():
-    hp = getScreen(leftCornerx + 958,leftCornery + 16,leftCornerx + 1111,leftCornery + 25)
+    hp = getScreen(leftCornerx + 957,leftCornery + 16,leftCornerx + 1111,leftCornery + 25)
 
     # img = cv2.imread('snap__1426174990.png')
     # gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -128,19 +129,20 @@ def findHP(img):
     if (hpcolor != px).any():
         return statuses['none']
 
-    leftx = list(cnts[0][cnts[0][:,:,0].argmin()][0])[0]
+    leftx = left[0]
     rightx = list(cnts[0][cnts[0][:,:,0].argmax()][0])[0]
     diff = rightx - leftx
     if diff > 140:
         return statuses['full']
     if diff >= 75:
         return statuses['mhalf']
-    if diff < 75:
+    if diff < 75 and diff > 0:
         return statuses['lhalf']
     return statuses['dead']
 
 def moveMouse(x,y):
     autoit.mouse_move(x,y)
+
 def mouseRotate():
     autoit.mouse_move(655, 521)
     time.sleep(1)
@@ -148,12 +150,70 @@ def mouseRotate():
     autoit.mouse_move(670, 521)
     autoit.mouse_up('right')
 
+def checkOwnHp():
+    statuses = {'cp': -1, 'dead' : 0,  'lhalf' : 1, 'mhalf' : 2}
+    cpCord = (24, 58, 175, 69)
+    cp = ImageGrab.grab(cpCord)
+    imgCP =  array(cp.getdata(),dtype=uint8).reshape((cp.size[1],cp.size[0],3))
+    gray = cv2.cvtColor(imgCP, cv2.COLOR_BGR2GRAY)
+    ret,th1 = cv2.threshold(gray,120,255,cv2.THRESH_TOZERO_INV)
+    ret,th1 = cv2.threshold(th1,100,255,cv2.THRESH_TOZERO)
+    (cnts, hierarchy) = cv2.findContours(th1,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+
+    if (len(cnts) == 0):
+        return statuses['cp']
+
+    left = list(cnts[0][cnts[0][:,:,0].argmin()][0])
+    right = list(cnts[0][cnts[0][:,:,0].argmax()][0])
+    diff = right[0] - left[0]
+    if diff < 140:
+        return statuses['cp']
+
+    hpCord = (24, 72, 175, 84)
+    hp = ImageGrab.grab(hpCord)
+    imgHP =  array(hp.getdata(),dtype=uint8).reshape((hp.size[1],hp.size[0],3))
+    gray = cv2.cvtColor(imgHP, cv2.COLOR_BGR2GRAY)
+    ret,th1 = cv2.threshold(gray,130,255,cv2.THRESH_TOZERO_INV)
+    ret,th1 = cv2.threshold(th1,90,255,cv2.THRESH_TOZERO)
+    (cnts, hierarchy) = cv2.findContours(th1,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+
+    if (len(cnts) == 0):
+        return statuses['dead']
+
+    left = list(cnts[0][cnts[0][:,:,0].argmin()][0])
+    right = list(cnts[0][cnts[0][:,:,0].argmax()][0])
+    diff = right[0] - left[0]
+    if diff >= 75:
+        return statuses['mhalf']
+    if diff < 75:
+        return statuses['lhalf']
+
 def main():
     autoit.win_wait(title, 5)
     counter = 0
     splcnt = 0
-
+    poitonUse = 0
+    time.sleep(2)
     while True:
+        hpstatus = checkOwnHp()
+        print 'hp ' + str(hpstatus)
+        if hpstatus == -1:
+            print 'CPDamage'
+            cv2.imwrite('CPDamage' + str(int(time.time())) + '.png',getScreen(leftCornerx,leftCornery,x2,fullY2))
+            autoit.win_kill(title)
+        if hpstatus == 0:
+            print 'Dead'
+            cv2.imwrite('Dead' + str(int(time.time())) + '.png',getScreen(leftCornerx,leftCornery,x2,fullY2))
+            autoit.win_kill(title)
+        if hpstatus == 1:
+            if poitonUse == 0:
+                autoit.control_send(title, '', '{F10}', 0)
+            poitonUse += 1
+            if poitonUse > 6:
+                poitonUse = 0
+        else:
+            poitonUse = 0
+
         img = getScreen(leftCornerx,leftCornery,x2,y2)
         res = findHP(img);
         print res
