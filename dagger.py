@@ -55,19 +55,21 @@ def findTarget():
         center = round((right[0]+left[0])/2)
         center = int(center)
         moveMouse(center-10,left[1]+70)
+        autoit.control_send(title, '', '{F3}', 0)
         res = findHP(img);
         if res > 0:
-            autoit.control_send(title, '', '{F2}', 0)
-            sleep(0.1,0.4)
+            autoit.control_send(title, '', '{F1}', 0)
+            sleep(0.2, 0.7)
             return
         if (findFromTargeted(left, right)):
             autoit.mouse_click('left', center-10, left[1]+70)
             return True
         pyautogui.moveTo(center,left[1]+70)
         moveMouse(center,left[1]+70)
+        autoit.control_send(title, '', '{F3}', 0)
         res = findHP(img);
         if res > 0:
-            autoit.control_send(title, '', '{F2}', 0)
+            autoit.control_send(title, '', '{F1}', 0)
             return
         if (findFromTargeted(left, right)):
             autoit.mouse_click('left', center+10, left[1]+70)
@@ -202,10 +204,9 @@ def main():
     counter = 0
     splcnt = 0
     poitonUse = 0
-    cycle = True
-    while cycle:
+    while True:
         hpstatus = checkOwnHp()
-        print 'hps ' + str(hpstatus)
+        print 'hp ' + str(hpstatus)
         if hpstatus == -1:
             print 'CPDamage'
             cv2.imwrite('CPDamage' + str(int(time.time())) + '.png',getScreen(leftCornerx,leftCornery,x2,fullY2))
@@ -213,8 +214,7 @@ def main():
         if hpstatus == 0:
             print 'Dead'
             cv2.imwrite('Dead' + str(int(time.time())) + '.png',getScreen(leftCornerx,leftCornery,x2,fullY2))
-            cycle = False
-            # autoit.win_kill(title)
+            autoit.win_kill(title)
         if hpstatus == 1:
             if poitonUse == 0:
                 autoit.control_send(title, '', '{F10}', 0)
@@ -226,34 +226,24 @@ def main():
 
         img = getScreen(leftCornerx,leftCornery,x2,y2)
         res = findHP(img);
-        print 'tgs ' + str(res)
+        print 'targetst ' + str(res)
 
         if res > 0:
-            if res > 2 and splcnt < 4:
-                autoit.control_send(title, '', '{F2}', 0)
-                sleep(1,3)
-                splcnt += 1
-            else:
-                autoit.control_send(title, '', '{F1}', 0)
-                sleep(2,4)
+            autoit.control_send(title, '', '{F1}', 0)
             counter = 0
+            sleep(2,4)
         else:
             splcnt = 0
-            if res == 0 and counter == 0:
-                autoit.control_send(title, '', '{F4}', 0)
-                sleep(0.2,0.7)
-
             if counter < 3:
                 autoit.control_send(title, '', '{F3}', 0)
-                if res == 0 and counter == 0:
-                    sleep(0.1,0.3)
-                    autoit.control_send(title, '', '{F2}', 0)
+                sleep(0.1,0.3)
+                autoit.control_send(title, '', '{F1}', 0)
 
             if counter > 2:
                 findTarget()
                 counter = 0
             counter += 1
-        print 'cnt ' + str(counter)
+        print 'counter ' + str(counter)
     pass
 
 if __name__ == '__main__':
