@@ -1,3 +1,4 @@
+
 import win32api, win32con, ctypes, autoit
 from PIL import ImageOps, Image, ImageGrab
 from numpy import *
@@ -10,8 +11,7 @@ leftCornerx = 7
 leftCornery = 38
 x1 = leftCornerx
 y1 = leftCornery
-x2 = 1390
-# y2 = 1000
+x2 = 1554
 y2 = 360
 fullY2 = 1000
 title = "[CLASS:l2UnrealWWindowsViewportWindow]"
@@ -27,14 +27,34 @@ def getScreen(x1, y1, x2, y2):
     return img
 
 def getTargetCntrs(img):
+    # img[leftCornery:106, leftCornerx:506]=cv::Scalar(0, 0, 0)
+    img[0:106, 0:506]=(0, 0, 0)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    ret,th1 = cv2.threshold(gray,253,255,cv2.THRESH_TOZERO_INV)
-    ret,th3 = cv2.threshold(th1,251,255,cv2.THRESH_BINARY)
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (20, 15))
+    # for i in xrange(245,255):
+    #     ret,th1 = cv2.threshold(gray,i,255,cv2.THRESH_TOZERO_INV)
+    #     for j in xrange(230,255):
+    #         ret,th3 = cv2.threshold(th1,j,255,cv2.THRESH_BINARY)
+    # #     # cv2.imwrite('th1_' + str(i) + str(int(time.time())) + '.png',th1)
+    # #     ret,th3 = cv2.threshold(th1,i,255,cv2.THRESH_BINARY)
+    #         cv2.imwrite('tg\\th3_i' + str(i) + '_j' + str(j) + '_' + str(int(time.time())) + '.png',th3)
+    # bla()
+    ret,th1 = cv2.threshold(gray,254,255,cv2.THRESH_TOZERO_INV)
+    ret,th3 = cv2.threshold(th1,252,255,cv2.THRESH_BINARY)
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (80, 5))
     closed = cv2.morphologyEx(th3, cv2.MORPH_CLOSE, kernel)
-    closed = cv2.erode(closed, None, iterations = 3)
-    closed = cv2.dilate(closed, None, iterations = 2)
+    # cv2.imshow('closed0',closed)
+    kernel2 = ones((1,2),uint8)
+    # print 'kernel ' + str(kernel2)
+    closed = cv2.erode(closed, kernel2,iterations = 2)
+    # cv2.imshow('closed1',closed)
+    closed = cv2.dilate(closed, None, iterations = 3)
+    # cv2.imshow('closed2',closed)
     (cnts, hierarchy) = cv2.findContours(closed,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    # cv2.drawContours(img, cnts, -1, (0,255,0), 3)
+    # cv2.imshow('image',img)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+    # bla()
     return cnts;
 
 def findTarget():
@@ -124,11 +144,31 @@ def findFromTargeted(left, right):
             else:
                 return False
     return False
-def grabHP():
-    hp = getScreen(528,54,686,64)
-    # cv2.imshow('image',hp)
+
+
+def matchBuff(buffname, x, y):
+    template = cv2.imread(buffname, 0)
+    roi = getScreen(x, y, x+30, y+30)
+    # cv2.imshow('roi',roi)
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
+    roi = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
+    ret,th1 = cv2.threshold(roi,249,255,cv2.THRESH_TOZERO_INV)
+    ret,th2 = cv2.threshold(th1,110,255,cv2.THRESH_BINARY)
+    ret,tp1 = cv2.threshold(template,249,255,cv2.THRESH_TOZERO_INV)
+    ret,tp2 = cv2.threshold(tp1,110,255,cv2.THRESH_BINARY)
+    res = cv2.matchTemplate(th2, tp2, cv2.TM_CCORR_NORMED)
+    if (res.any()):
+        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+        print 'buffname %.2f'%max_val
+        if (max_val > 0.2):
+            return True
+    print 'not any'
+    return False
+
+def grabHP():
+    hp = getScreen(leftCornerx + 514,leftCornery + 16,leftCornerx + 668,leftCornery + 25)
+
     # img = cv2.imread('snap__1426174990.png')
     # gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     # roi = gray[16:25, 958:1111];
@@ -227,7 +267,6 @@ def checkOwnCp():
     (cnts, hierarchy) = cv2.findContours(mask,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
     if (len(cnts) == 0):
         return statuses['dead']
-
     left = list(cnts[0][cnts[0][:,:,0].argmin()][0])
     right = list(cnts[0][cnts[0][:,:,0].argmax()][0])
     diff = right[0] - left[0]
