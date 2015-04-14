@@ -81,6 +81,7 @@ def findTarget():
             autoit.control_send(title, '', '{F1}', 0)
             sleep(0.1,0.4)
             return
+
         if (findFromTargeted(left, right)):
             autoit.mouse_click('left', center, left[1]+80)
             sleep(0.1,0.3)
@@ -97,6 +98,8 @@ def findTarget():
     mouseRotate()
 
 def findFromTargeted(left, right):
+    if left[0] - left[1] < 20:
+        return False
     template = cv2.imread('template_target2.png', 0)
     # print template.shape
     roi = getScreen(left[0]-70+leftCornerx, left[1]-15+leftCornery, right[0]+70+leftCornerx, right[1]+12+leftCornery)
