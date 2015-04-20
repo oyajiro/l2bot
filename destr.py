@@ -28,9 +28,10 @@ def main():
     fightCounter = 0
     rage = 0
     while cycle:
+        cpstatus = checkOwnCp()
         hpstatus = checkOwnHp()
         print 'hp ' + str(hpstatus)
-        if hpstatus == -1:
+        if cpstatus == -1:
             print 'CPDamage'
             cv2.imwrite('CPDamage' + str(int(time.time())) + '.png',getScreen(leftCornerx,leftCornery,x2,fullY2))
             cycle = False

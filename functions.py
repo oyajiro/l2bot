@@ -69,8 +69,8 @@ def findTarget():
         right = list(cnt[cnt[:,:,0].argmax()][0])
         print 'left x' + str(left[0])+ 'y '+ str(left[1])
         print 'right x' + str(right[0])+ 'y '+ str(right[1])
-        if right[0]-left[0] < 20:
-            print 'small diff ' + str(right[0]-left[0])
+        if right[0] - left[0] < 20:
+            print 'Small diff ' + str(right[0] - left[0])
             continue
         center = round((right[0]+left[0])/2)
         center = int(center)
