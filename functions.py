@@ -287,6 +287,9 @@ def checkOwnHp():
     hpCord = (24, 71, 175, 84)
     hp = ImageGrab.grab(hpCord)
     imgHP =  array(hp.getdata(),dtype=uint8).reshape((hp.size[1],hp.size[0],3))
+    px = imgHP[4, 5];
+    if (px == hpdeadcolor).all():
+        return statuses['dead']
     # for x in xrange(80,150):
     #     for y in xrange(2,5):
     #         px = imgHP[y, x];
@@ -304,11 +307,7 @@ def checkOwnHp():
     (cnts, hierarchy) = cv2.findContours(mask,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 
     if (len(cnts) == 0):
-        px = imgHP[4, 5];
-        if (px == hpdeadcolor).all():
-            return statuses['dead']
-        else:
-            return statuses['lhalf'];
+        return statuses['lhalf'];
 
     left = list(cnts[0][cnts[0][:,:,0].argmin()][0])
     right = list(cnts[0][cnts[0][:,:,0].argmax()][0])
