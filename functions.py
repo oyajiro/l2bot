@@ -1,4 +1,3 @@
-
 import win32api, win32con, ctypes, autoit
 from PIL import ImageOps, Image, ImageGrab
 from numpy import *
@@ -6,6 +5,7 @@ import os
 import time
 import cv2
 import random
+import winsound
 
 leftCornerx = 7
 leftCornery = 38
@@ -98,8 +98,6 @@ def findTarget():
     mouseRotate()
 
 def findFromTargeted(left, right):
-    if left[0] - left[1] < 20:
-        return False
     template = cv2.imread('template_target2.png', 0)
     # print template.shape
     roi = getScreen(left[0]-70+leftCornerx, left[1]-15+leftCornery, right[0]+70+leftCornerx, right[1]+12+leftCornery)
@@ -269,6 +267,7 @@ def checkOwnCp():
 
     (cnts, hierarchy) = cv2.findContours(mask,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
     if (len(cnts) == 0):
+        winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
         return statuses['dead']
     left = list(cnts[0][cnts[0][:,:,0].argmin()][0])
     right = list(cnts[0][cnts[0][:,:,0].argmax()][0])
@@ -281,14 +280,18 @@ def checkOwnCp():
         return statuses['lhalf']
 
 def checkOwnHp():
-    statuses = {'dead' : 0,  'lhalf' : 1, 'mhalf' : 2, 'full': 3}
+    statuses = {'verylow' : -1, 'dead' : 0,  'lhalf' : 1, 'mhalf' : 2, 'full': 3}
     hpcolor = [140,97,90]
     hpdeadcolor = [57,44,41]
     hpCord = (24, 71, 175, 84)
     hp = ImageGrab.grab(hpCord)
     imgHP =  array(hp.getdata(),dtype=uint8).reshape((hp.size[1],hp.size[0],3))
+    px = imgHP[4, 28];
+    if (px == hpdeadcolor).all():
+        return statuses['verylow']
     px = imgHP[4, 5];
     if (px == hpdeadcolor).all():
+        winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
         return statuses['dead']
     # for x in xrange(80,150):
     #     for y in xrange(2,5):
@@ -348,3 +351,31 @@ def checkOwnMp():
         return statuses['lhalf']
     if diff < 60:
         return statuses['less']
+
+def restoreMenyHp():
+    template = cv2.imread('template_button.png', 0)
+    cycle = True
+    while cycle:
+        autoit.mouse_click('left', 1365, 983)
+        sleep(0.3,0.7)
+        autoit.mouse_click('left', 1250, 704)
+        sleep(0.6,0.7)
+        button = getScreen(540, 170, 675, 220)
+        button = cv2.cvtColor(button, cv2.COLOR_BGR2GRAY)
+        res = cv2.matchTemplate(button, template, cv2.TM_CCORR_NORMED)
+        if (res.any()):
+            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+            print 'menuval %.2f'%max_val
+            if (max_val > 0.9):
+                autoit.mouse_click('left', 606, 189)
+                sleep(0.3,0.7)
+                autoit.mouse_click('left', 729, 322)
+                sleep(0.4,0.9)
+                autoit.mouse_click('left', 1043, 92)
+                sleep(0.4,0.9)
+                autoit.mouse_click('left', 1378, 670)
+                cycle = False
+        else:
+            autoit.mouse_click('left', 1043, 92)
+            sleep(0.4,0.9)
+            autoit.mouse_click('left', 1378, 670)            

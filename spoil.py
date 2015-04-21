@@ -52,6 +52,12 @@ def main():
         else:
             poitonUse = 0
 
+        if hpstatus == -1:
+            autoit.control_send(title, '', '{F9}', 0)
+            sleep(6,10)
+            restoreMenyHp()
+            autoit.control_send(title, '', '{F9}', 0)
+
         img = getScreen(leftCornerx,leftCornery,x2,y2)
         res = findHP(img);
         print 'tgs ' + str(res)
