@@ -74,7 +74,7 @@ def findTarget():
             continue
         center = round((right[0]+left[0])/2)
         center = int(center)
-        moveMouse(center,left[1]+80)
+        moveMouse(center,left[1]+90)
         sleep(0.2,0.4)
         res = findHP(img);
         if res > 0:
@@ -83,9 +83,9 @@ def findTarget():
             return
 
         if (findFromTargeted(left, right)):
-            autoit.mouse_click('left', center, left[1]+80)
+            autoit.mouse_click('left', center, left[1]+90)
             sleep(0.1,0.3)
-            autoit.mouse_click('left', center, left[1]+80)
+            autoit.mouse_click('left', center, left[1]+90)
             return True
         # moveMouse(center,left[1]+70)
         # res = findHP(img);
@@ -231,7 +231,7 @@ def findHP(img):
     return statuses['dead']
 
 def moveMouse(x,y):
-    autoit.mouse_move(x,y,2)
+    autoit.mouse_move(x,y,3)
 
 def sleep(a,b):
     time.sleep(random.uniform(a, b))
