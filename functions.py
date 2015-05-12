@@ -149,20 +149,17 @@ def findFromTargeted(left, right):
 
 def matchBuff(buffname, x, y):
     template = cv2.imread(buffname, 0)
-    roi = getScreen(x, y, x+30, y+30)
-    # cv2.imshow('roi',roi)
+    roi = getScreen(x, y, x+32, y+32)
+    roi = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
+    # cv2.imshow('image',roi)
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
-    roi = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
-    ret,th1 = cv2.threshold(roi,249,255,cv2.THRESH_TOZERO_INV)
-    ret,th2 = cv2.threshold(th1,110,255,cv2.THRESH_BINARY)
-    ret,tp1 = cv2.threshold(template,249,255,cv2.THRESH_TOZERO_INV)
-    ret,tp2 = cv2.threshold(tp1,110,255,cv2.THRESH_BINARY)
-    res = cv2.matchTemplate(th2, tp2, cv2.TM_CCORR_NORMED)
+    # bla()
+    res = cv2.matchTemplate(roi, template, cv2.TM_CCORR_NORMED)
     if (res.any()):
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
         print 'buffname %.2f'%max_val
-        if (max_val > 0.2):
+        if (max_val > 0.98):
             return True
     print 'not any'
     return False

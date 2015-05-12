@@ -48,7 +48,7 @@ def main():
                 poitonUse = 0
         else:
             poitonUse = 0
-        if (not matchBuff('template_rage.png',323,80)):
+        if (not matchBuff('template_rage.png',360,80)):
             if (rage == 0):
                 autoit.mouse_click('left', 1485, 885)
                 sleep(0.1,0.3)
