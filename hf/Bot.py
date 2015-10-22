@@ -363,3 +363,32 @@ class Bot:
             return 1
 
         return 0
+
+    def findTemplate(self, templateName, dir):
+        template = cv2.imread(dir + templateName, 0)
+        roi = self.getScreen(self.leftCornerx,self.leftCornery,self.x2,self.y2)
+        roi = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
+        res = cv2.matchTemplate(roi, template, cv2.TM_CCORR_NORMED)
+        if (res.any()):
+            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+            print templateName + '%.2f'%max_val
+            if (max_val > 0.98):
+                return (min_val, max_val, min_loc, max_loc)
+        print 'not_match '+ templateName
+        return False
+
+    def clickTemplate(self, templateName, dir, mouse_btn):
+        find = self.findTemplate(templateName, dir)
+        if (find):
+            min_val, max_val, min_loc, (x1,y1) = find
+            print (find)
+            # roi2 = roi[y1:y1+th, x1:x1+tw]
+            # print 352+x1
+            # print 875+y1
+            # cv2.imshow("2", roi)
+            # cv2.waitKey(0)
+            # bla()
+            autoit.mouse_click(mouse_btn, self.leftCornerx+x1+3, self.leftCornery+y1+3)
+            return True
+        print 'not_click '+ templateName
+        return False

@@ -40,7 +40,7 @@ def main():
             autoit.control_send(bot.title, '', '{ESC}', 0)
             bot.sleep(0.3,0.6)
             autoit.control_send(bot.title, '', '{F3}', 0)
-            bot.mouseRotate()
+            # bot.mouseRotate()
             fullCounter = 0
             
         if res > 0:
