@@ -54,11 +54,11 @@ def main():
                 bot.sleep(0.1,0.2)
                 autoit.control_send(bot.title, '', '{F1}', 0)
 
+            if counter > 1:
+                # bot.findTarget()
+                autoit.control_send(bot.title, '', '{F7}', 0)
             if counter > 2:
-                bot.findTarget()
-                # autoit.control_send(bot.title, '', '{F7}', 0)
-                # autoit.control_send(bot.title, '', '{F3}', 0)
-                # bot.sleep(0.1,0.2)
+                autoit.control_send(bot.title, '', '{F8}', 0)
                 counter = 0
             counter += 1
         print 'cnt ' + str(counter)

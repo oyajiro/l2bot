@@ -16,18 +16,20 @@ def main():
     fullCounter = 0
     while cycle:
         hpstatus = bot.checkOwnHp()
-        mpstatus = bot.checkOwnMp()
         print 'hp ' + str(hpstatus)
+        checkOwnMp()
         if hpstatus == 0:
             print 'Dead'
             cv2.imwrite('Dead' + str(int(time.time())) + '.png',bot.getScreen(leftCornerx,leftCornery,x2,fullY2))
             cycle = False
-        if hpstatus == 1:
-            autoit.control_send(bot.title, '', '{F5}', 0)
-        print 'mp ' + str(mpstatus)
-        if mpstatus < 2:
-            autoit.control_send(bot.title, '', '{F11}', 0)
         res = bot.findHP();
+        if hpstatus < 2 and res > 0:
+            autoit.control_send(bot.title, '', '{F5}', 0)
+            bot.sleep(0.1,0.4)
+            autoit.control_send(bot.title, '', '{F1}', 0)
+            bot.sleep(0.1,0.3)
+            autoit.control_send(bot.title, '', '{F3}', 0)
+            continue
         print 'tgs ' + str(res)
         if res == 3:
             fullCounter += 1
@@ -38,29 +40,44 @@ def main():
             autoit.control_send(bot.title, '', '{ESC}', 0)
             bot.sleep(0.3,0.6)
             # autoit.control_send(bot.title, '', '{F3}', 0)
-            bot.mouseRotate()
+            # bot.mouseRotate()
             fullCounter = 0
             
         if res > 0:
-            autoit.control_send(bot.title, '', '{F4}', 0)
+            print 'F1'
+            autoit.control_send(bot.title, '', '{F1}', 0)
             counter = 0
             bot.sleep(0.1,0.3)
+            autoit.control_send(bot.title, '', '{F1}', 0)
+            continue
             # autoit.control_send(bot.title, '', '{F4}', 0)
         else:
             fullCounter = 0
-            autoit.control_send(bot.title, '', '{F9}', 0)
-            if counter < 1:
-                # autoit.control_send(bot.title, '', '{F3}', 0)
+            if res == 0:
+                autoit.control_send(bot.title, '', '{F11}', 0)
+                bot.sleep(0.1,0.4)
+                autoit.control_send(bot.title, '', '{F11}', 0)
+            autoit.control_send(bot.title, '', '{F7}', 0)
+            if counter < 3:
+                autoit.control_send(bot.title, '', '{F3}', 0)
+                print 'F3'
                 bot.sleep(0.1,0.2)
-                autoit.control_send(bot.title, '', '{F5}', 0)
+                autoit.control_send(bot.title, '', '{F1}', 0)
 
-            if counter > 0:
+            if counter > 2:
                 # bot.findTarget()
                 autoit.control_send(bot.title, '', '{F7}', 0)
+                print 'F7'
                 counter = 0
             counter += 1
         print 'cnt ' + str(counter)
     pass
+
+def checkOwnMp():
+    bot = Bot()
+    if bot.checkOwnMp() <= 1:
+        print 'MP_USE'
+        autoit.control_send(bot.title, '', '{F12}', 0)
 
 if __name__ == '__main__':
     main()

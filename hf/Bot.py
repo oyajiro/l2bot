@@ -10,7 +10,7 @@ class Bot:
 
     leftCornerx = 7
     leftCornery = 38
-    x2 = 1661
+    x2 = 1550
     y2 = 870
     title = "[TITLE:Lineage II]"
 
@@ -120,6 +120,9 @@ class Bot:
         template = cv2.imread('buffs/' + clickname, 0)
         th, tw = template.shape[:2]
         roi = self.getScreen(352, 875, 865, 1063)
+        # cv2.imshow("roi", roi)
+        # cv2.waitKey(0)
+        # bla()
         roi = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
         res = cv2.matchTemplate(roi, template, cv2.TM_CCORR_NORMED)
         if (res.any()):
@@ -137,7 +140,7 @@ class Bot:
         return False
 
     def grabHP(self):
-        hp = self.getScreen(self.leftCornerx + 520,self.leftCornery + 16,self.leftCornerx + 675,self.leftCornery + 25)
+        hp = self.getScreen(self.leftCornerx + 527,self.leftCornery + 16,self.leftCornerx + 700,self.leftCornery + 25)
 
         return hp
 
@@ -146,7 +149,9 @@ class Bot:
         statuses = {'none': -1, 'dead' : 0,  'lhalf' : 1, 'mhalf' : 2, 'full' : 3}
         hpcolorMin = [111, 23, 18]
         hpcolorMax = [111, 23, 21]
-        deadcolor = [58, 57, 68]
+        deadcolor = [46, 25, 23]
+        deadcolorMin = array([41, 21, 21])
+        deadcolorMax = array([53, 32, 30])
         hp = self.grabHP()
 
         mask = cv2.inRange(hp, array(hpcolorMin, dtype='uint8'), array(hpcolorMax, dtype='uint8'))
@@ -158,10 +163,19 @@ class Bot:
         # cv2.waitKey(0)
         # bla()
         if (len(cnts) == 0):
-            deadarr = array(deadcolor, dtype='uint8')
-            mask = cv2.inRange(hp, deadarr, deadarr)
+            # for y in range(0, 8):
+            #     print hp[y, 28];
+            # bla()
+            mask = cv2.inRange(hp, deadcolorMin, deadcolorMax)
+            mask = cv2.filter2D(mask,-1, ones((2,20), float32))
             (cnts, hierarchy) = cv2.findContours(mask,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+            # cv2.drawContours(hp, cnts, -1, (255,0,0), 3)
+            # cv2.imshow("images", hp)
+            # cv2.waitKey(0)
+            # bla()
+            print 'LEN', len(cnts)
             if (len(cnts) > 0):
+                print 'DEAD'
                 return statuses['dead']
             else:
                 return statuses['none']
@@ -169,6 +183,7 @@ class Bot:
         leftx = list(cnts[0][cnts[0][:,:,0].argmin()][0])[0]
         rightx = list(cnts[0][cnts[0][:,:,0].argmax()][0])[0]
         diff = rightx - leftx
+        print 'diff ', diff
         if diff > 147:
             return statuses['full']
         if diff >= 75:
@@ -245,9 +260,9 @@ class Bot:
         left = list(cnts[0][cnts[0][:,:,0].argmin()][0])
         right = list(cnts[0][cnts[0][:,:,0].argmax()][0])
         diff = right[0] - left[0]
-        if diff >= 90:
+        if diff >= 110:
             return statuses['mhalf']
-        if diff < 90:
+        if diff < 110:
             return statuses['lhalf']
 
     def checkOwnMp(self):
@@ -270,11 +285,12 @@ class Bot:
         left = list(cnts[0][cnts[0][:,:,0].argmin()][0])
         right = list(cnts[0][cnts[0][:,:,0].argmax()][0])
         diff = right[0] - left[0]
+        print 'MP_DIFF ', diff
         if diff >= 100:
             return statuses['mhalf']
-        if diff > 60 and diff < 100:
+        if diff > 15 and diff < 100:
             return statuses['lhalf']
-        if diff < 60:
+        if diff < 15:
             return statuses['less']
 
     def restoreMenyHp():

@@ -8,8 +8,8 @@ def main():
     # print 'Argument:', str(sys.argv[1])
     while cycle:
         if not bot.matchBuff(str(sys.argv[1]) + '.png'):
-            bot.clickBuff(str(sys.argv[1]) + '_click.png')
-        # autoit.control_send(bot.title, '', '{F5}', 0)
+            # bot.clickBuff(str(sys.argv[1]) + '_click.png')
+            autoit.control_send(bot.title, '', '{F4}', 0)
         bot.sleep(20,40)
     pass
 

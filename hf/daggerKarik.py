@@ -18,11 +18,11 @@ def main():
         hpstatus = bot.checkOwnHp()
         print 'hp ' + str(hpstatus)
         if hpstatus == 0:
-            autoit.control_send(bot.title, '', '{F9}', 0)
-            bot.sleep(0.3,0.6)
-            print 'Dead'
-            cv2.imwrite('Dead' + str(int(time.time())) + '.png',bot.getScreen(leftCornerx,leftCornery,x2,fullY2))
-            cycle = False
+            bot.sleep(2,3)
+            if hpstatus == 0:
+                print 'Dead'
+                cv2.imwrite('Dead' + str(int(time.time())) + '.png',bot.getScreen(leftCornerx,leftCornery,x2,fullY2))
+                cycle = False
         if hpstatus == 1:
             if poitonUse == 0:
                 autoit.control_send(bot.title, '', '{F10}', 0)
@@ -36,15 +36,13 @@ def main():
         if res == 3:
             fullCounter += 1
             print 'fc ' + str(fullCounter)
-            autoit.control_send(bot.title, '', '{F1}', 0)
         else:
             fullCounter = 0
-        if fullCounter > 4:
+            lure = 0
+        if fullCounter > 6:
             autoit.control_send(bot.title, '', '{ESC}', 0)
             bot.sleep(0.3,0.6)
             autoit.control_send(bot.title, '', '{F3}', 0)
-            bot.sleep(0.1,0.3)
-            autoit.control_send(bot.title, '', '{F1}', 0)
             # bot.mouseRotate()
             fullCounter = 0
             
@@ -58,17 +56,20 @@ def main():
                 bot.sleep(1,3)
         else:
             fullCounter = 0
-            if counter < 3:
+            if counter < 2:
                 autoit.control_send(bot.title, '', '{F3}', 0)
-                bot.sleep(0.5,0.8)
+                bot.sleep(0.1,0.2)
                 autoit.control_send(bot.title, '', '{F1}', 0)
-                print 'F3'
 
-            if counter > 2:
+            if counter > 1:
                 # bot.findTarget()
+                print 'counrter > 1'
                 autoit.control_send(bot.title, '', '{F7}', 0)
-            if counter > 3:
-                autoit.control_send(bot.title, '', '{F8}', 0)
+                bot.sleep(0.3,0.5)
+                if bot.findHP() > 0 :
+                    print 'lure'
+                    autoit.control_send(bot.title, '', '{F5}', 0)
+                    bot.sleep(5,7)
                 counter = 0
             counter += 1
         print 'cnt ' + str(counter)
