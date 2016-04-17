@@ -10,7 +10,7 @@ class Bot:
 
     leftCornerx = 7
     leftCornery = 38
-    x2 = 1550
+    x2 = 1400
     y2 = 870
     title = "[TITLE:Lineage II]"
 
@@ -140,7 +140,7 @@ class Bot:
         return False
 
     def grabHP(self):
-        hp = self.getScreen(self.leftCornerx + 527,self.leftCornery + 16,self.leftCornerx + 700,self.leftCornery + 25)
+        hp = self.getScreen(self.leftCornerx + 500,self.leftCornery + 15,self.leftCornerx + 700,self.leftCornery + 28)
 
         return hp
 
@@ -168,13 +168,13 @@ class Bot:
             # bla()
             mask = cv2.inRange(hp, deadcolorMin, deadcolorMax)
             mask = cv2.filter2D(mask,-1, ones((2,20), float32))
-            (cnts, hierarchy) = cv2.findContours(mask,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+            (cnts2, hierarchy) = cv2.findContours(mask,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
             # cv2.drawContours(hp, cnts, -1, (255,0,0), 3)
             # cv2.imshow("images", hp)
             # cv2.waitKey(0)
             # bla()
             print 'LEN', len(cnts)
-            if (len(cnts) > 0):
+            if (len(cnts2) > 0):
                 print 'DEAD'
                 return statuses['dead']
             else:
@@ -268,7 +268,7 @@ class Bot:
     def checkOwnMp(self):
         statuses = {'none': 0, 'less': 1,  'lhalf': 2, 'mhalf': 3}
         mpcolor = [76,98,136]
-        mpCord = (26, 80, 181, 85)
+        mpCord = (20, 80, 185, 85)
         mp = ImageGrab.grab(mpCord)
         imgmp =  array(mp.getdata(),dtype=uint8).reshape((mp.size[1],mp.size[0],3))
         mparr = array(mpcolor, dtype='uint8')

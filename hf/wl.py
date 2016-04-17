@@ -56,6 +56,12 @@ def main():
                 bot.sleep(0.3,0.6)
             if res > 1 and res < 3:
                 bot.sleep(1,3)
+            if res == 1:
+                autoit.control_send(bot.title, '', '{F3}', 0)
+                bot.sleep(0.3,0.6)
+                autoit.control_send(bot.title, '', '{F2}', 0)
+                bot.sleep(0.3,0.6)
+                autoit.control_send(bot.title, '', '{F1}', 0)
         else:
             fullCounter = 0
             if counter < 3:
